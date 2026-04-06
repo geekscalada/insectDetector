@@ -1,0 +1,38 @@
+# Restricciones y contexto del Investigator Architect
+# Edita este fichero para establecer las preferencias base de tus proyectos.
+# El agente lo leerá al inicio de cada sesión de investigación.
+
+equipo:
+  tamaño: 1          # número de personas
+  perfiles: [fullstack]
+
+preferencias_stack:
+  runtime: node, python, raspberry pi 4 para POC y migrar a raspi 5 en producción, camera module 2 NoIR
+  lenguaje: typescript
+  package_manager: npm
+  # frameworks: []   # descomenta y añade si tienes preferencias: [express, fastify, nextjs...]
+  # db: []           # descomenta: [postgres, mongodb, sqlite, redis...]
+
+restricciones:
+  presupuesto: menos de 200€ teniendo en cuenta que ya tengo la raspberry y la cámara           # bajo | medio | alto | sin_restriccion
+  time_to_market: medio      # urgente | medio | sin_prisa
+  infraestructura_existente: ninguna   # describe qué ya tienes desplegado
+  cloud_preferido: ninguno   # aws | gcp | azure | ninguno | indiferente
+
+contexto_negocio:
+  tipo_proyecto: personal    # personal | startup | empresa | freelance
+  audiencia: interna         # interna | consumidor | b2b | b2c
+  open_source: false
+
+preferencias_arquitectura:
+  - Monolito a ser posible, modular y si es necesario se añade docker.
+  - 
+
+arquitectura de software:
+  - SOLID
+  - Código reutilizable y semántico
+  - Código extensible
+
+notas_adicionales: |
+  # Añade aquí cualquier restricción o contexto que no encaje en los campos anteriores.
+  # Ejemplo: "El proyecto ya tiene una API REST en Express que no se puede reescribir."
