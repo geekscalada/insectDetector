@@ -1,0 +1,34 @@
+# Restricciones y contexto del Investigator Architect
+# Edita este fichero para establecer las preferencias base de tus proyectos.
+# El agente lo leerá al inicio de cada sesión de investigación.
+
+equipo:
+  tamaño: 1          # número de personas
+  perfiles: [fullstack]
+
+preferencias_stack:
+  runtime: node      # node | python | go | java | rust | ...
+  lenguaje: typescript
+  package_manager: npm
+  # frameworks: []   # descomenta y añade si tienes preferencias: [express, fastify, nextjs...]
+  # db: []           # descomenta: [postgres, mongodb, sqlite, redis...]
+
+restricciones:
+  presupuesto: bajo          # bajo | medio | alto | sin_restriccion
+  time_to_market: medio      # urgente | medio | sin_prisa
+  infraestructura_existente: ninguna   # describe qué ya tienes desplegado
+  cloud_preferido: ninguno   # aws | gcp | azure | ninguno | indiferente
+
+contexto_negocio:
+  tipo_proyecto: personal    # personal | startup | empresa | freelance
+  audiencia: interna         # interna | consumidor | b2b | b2c
+  open_source: false
+
+preferencias_arquitectura:
+  # Deja en blanco para explorar todas las opciones, o especifica preferencias:
+  # estilo: monolito | microservicios | serverless | modular-monolith
+  # patrones: [ddd, cqrs, event-driven]
+
+notas_adicionales: |
+  # Añade aquí cualquier restricción o contexto que no encaje en los campos anteriores.
+  # Ejemplo: "El proyecto ya tiene una API REST en Express que no se puede reescribir."
