@@ -1,0 +1,22 @@
+camera:
+  fps: 10
+
+detector:
+  mog2_history: 500
+  mog2_var_threshold: 16
+  detect_shadows: true
+  morph_kernel_size: 3
+  morph_iterations: 1
+  min_area: 50
+  max_area: 5000
+  min_aspect_ratio: 1.5
+  max_aspect_ratio: 3.0
+
+storage:
+  output_dir: detections/
+
+mqtt:
+  broker_host: "192.168.1.100"
+  broker_port: 1883
+  topic: "insectdetector/alert"
+  cooldown_seconds: 60

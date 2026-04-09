@@ -1,0 +1,4 @@
+opencv-python-headless>=4.8
+picamera2>=0.3
+paho-mqtt>=1.6
+pyyaml>=6.0
