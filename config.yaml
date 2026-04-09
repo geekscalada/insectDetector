@@ -20,3 +20,6 @@ mqtt:
   broker_port: 1883
   topic: "insectdetector/alert"
   cooldown_seconds: 60
+
+orchestrator:
+  capture_limit: 5
