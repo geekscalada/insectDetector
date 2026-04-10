@@ -49,9 +49,11 @@ for i, frame in enumerate(FrameSource(fps)):
 
 ### Nombre de fichero JPEG
 
-`storage.save` usa `datetime.isoformat()` con los `:` reemplazados por `-` para compatibilidad con sistemas de ficheros: `YYYY-MM-DDTHH-MM-SS.jpg`. El directorio de salida viene de `config['storage']['output_dir']`.
+`storage.save` usa `datetime.isoformat()` con los `:` reemplazados por `-` para compatibilidad con sistemas de ficheros: `YYYY-MM-DDTHH-MM-SS.ffffff.jpg`. Se incluyen microsegundos para garantizar unicidad cuando se capturan múltiples frames por segundo (e.g. a 10 FPS). El directorio de salida viene de `config['storage']['output_dir']`.
 
 **Alternativa descartada:** timestamp Unix — menos legible al revisar evidencias manualmente.
+
+**Decisión de verificación:** el formato sin microsegundos (`HH-MM-SS`) causaba sobreescritura de ficheros a 10 FPS durante la verificación en Pi — los 5 frames se capturaban en <1 segundo y compartían nombre.
 
 ### Conversión BGR → JPEG
 

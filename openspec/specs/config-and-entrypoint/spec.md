@@ -19,6 +19,10 @@ El sistema SHALL tener un fichero `config.yaml` en la raíz del proyecto que sea
 - **WHEN** se lee `config.yaml`
 - **THEN** el documento contiene `mqtt.broker_host`, `mqtt.broker_port`, `mqtt.topic`, `mqtt.cooldown_seconds`
 
+#### Scenario: config.yaml contiene la sección orchestrator con capture_limit
+- **WHEN** se lee `config.yaml`
+- **THEN** el documento contiene `orchestrator.capture_limit` con valor entero positivo
+
 ---
 
 ### Requirement: main.py es el único punto de entrada del sistema
