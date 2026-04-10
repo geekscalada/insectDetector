@@ -1,4 +1,4 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: config.yaml centraliza todos los parámetros del sistema
 El sistema SHALL tener un fichero `config.yaml` en la raíz del proyecto que sea la única fuente de verdad para todos los parámetros configurables. Ningún valor numérico, ruta, dirección IP ni parámetro de algoritmo SHALL aparecer hardcodeado en el código fuente.
@@ -22,16 +22,3 @@ El sistema SHALL tener un fichero `config.yaml` en la raíz del proyecto que sea
 #### Scenario: config.yaml contiene la sección orchestrator sin capture_limit
 - **WHEN** se lee `config.yaml`
 - **THEN** el documento NO contiene `orchestrator.capture_limit`
-
----
-
-### Requirement: main.py es el único punto de entrada del sistema
-El sistema SHALL tener un `main.py` en la raíz que sea el único script ejecutable. SHALL cargar `config.yaml` con PyYAML, pasar la config al orchestrator y llamar a `orchestrator.run()`. SHALL tener menos de 30 líneas de código.
-
-#### Scenario: main.py carga la configuración desde config.yaml
-- **WHEN** se ejecuta `python main.py`
-- **THEN** el sistema carga `config.yaml` desde el directorio de trabajo actual usando PyYAML sin hardcodear la ruta en el código más allá de la constante `"config.yaml"`
-
-#### Scenario: main.py no contiene lógica de negocio
-- **WHEN** se revisa el código de `main.py`
-- **THEN** el fichero no contiene lógica de captura, detección, almacenamiento ni publicación MQTT — sólo carga config y delega al orchestrator

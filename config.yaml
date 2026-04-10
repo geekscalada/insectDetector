@@ -1,25 +1,109 @@
+# ──────────────────────────────────────────────
+# CÁMARA
+# ──────────────────────────────────────────────
 camera:
+  # Fotogramas por segundo que captura la cámara.
+  # Rango recomendado: 5–30. Subir: mayor resolución temporal (detecta insectos rápidos),
+  # más carga de CPU. Bajar: menos carga, puede perder insectos de paso rápido.
   fps: 10
 
+# ──────────────────────────────────────────────
+# DETECTOR DE MOVIMIENTO
+# ──────────────────────────────────────────────
 detector:
+  # Número de frames que MOG2 usa para aprender el modelo de fondo.
+  # Rango recomendado: 100–2000. Subir: modelo de fondo más estable,
+  # tarda más en adaptarse a cambios de iluminación. Bajar: se adapta más rápido
+  # pero puede detectar falsos positivos por sombras o vibraciones.
   mog2_history: 500
+
+  # Umbral de varianza para clasificar un píxel como primer plano (foreground).
+  # Rango recomendado: 8–64. Subir: menos sensible, ignora pequeñas diferencias
+  # (reduce ruido). Bajar: más sensible, detecta movimientos sutiles
+  # (pero aumenta falsos positivos).
   mog2_var_threshold: 16
+
+  # Activa la detección de sombras en MOG2 (true/false).
+  # true: MOG2 marca las sombras con valor 127 (en lugar de 255) para descartarlas;
+  # mejora la precisión pero tiene coste de CPU. false: las sombras se tratan
+  # como foreground, lo que puede generar detecciones falsas.
   detect_shadows: true
+
+  # Umbral de intensidad relativa para clasificar un píxel como sombra (solo si detect_shadows: true).
+  # Rango: 0.0–1.0. Subir (ej. 0.8): menos píxeles se clasifican como sombra,
+  # más foreground visible. Bajar (ej. 0.2): más píxeles se clasifican como sombra,
+  # menos foreground; útil si las sombras son muy oscuras.
+  mog2_shadow_threshold: 0.5
+
+  # Tamaño del kernel del filtro morfológico aplicado a la máscara de foreground.
+  # Rango recomendado: 2–7 (impar). Subir: elimina más ruido y fusiona blobs cercanos.
+  # Bajar: preserva detalles finos pero puede dejar píxeles de ruido sueltos.
   morph_kernel_size: 3
+
+  # Número de iteraciones del filtro morfológico.
+  # Rango recomendado: 1–3. Subir: efecto más agresivo (más limpieza o fusión).
+  # Bajar: efecto más suave. Valor 1 es suficiente para la mayoría de casos.
   morph_iterations: 1
+
+  # Tipo de operación morfológica sobre la máscara de foreground.
+  # Valores: open, close, erode, dilate.
+  # open (erosión + dilatación): elimina píxeles de ruido pequeño, conserva blobs grandes.
+  # close (dilatación + erosión): rellena huecos dentro de blobs, une fragmentos próximos.
+  # erode: reduce el tamaño de todos los blobs (elimina contornos).
+  # dilate: expande el tamaño de todos los blobs (une contornos).
+  morph_operator: "open"
+
+  # Área mínima en píxeles² para que un blob se considere una detección válida.
+  # Rango recomendado: 20–500. Subir: ignora insectos pequeños y ruido.
+  # Bajar: detecta insectos muy pequeños pero aumenta falsos positivos.
   min_area: 50
+
+  # Área máxima en píxeles² para que un blob se considere una detección válida.
+  # Rango recomendado: 1000–20000. Subir: permite detectar insectos grandes
+  # o a poca distancia de la cámara. Bajar: descarta cambios globales (sombras grandes).
   max_area: 5000
+
+  # Aspect ratio mínimo (lado_largo / lado_corto) del bounding box.
+  # Rango recomendado: 1.0–2.0. Subir: exige que el blob sea más alargado,
+  # descarta formas cuadradas. Bajar: acepta formas más redondeadas.
   min_aspect_ratio: 1.5
+
+  # Aspect ratio máximo (lado_largo / lado_corto) del bounding box.
+  # Rango recomendado: 2.0–6.0. Subir: acepta blobs muy alargados (insectos en vuelo).
+  # Bajar: descarta blobs demasiado lineales (artefactos, cables, bordes).
   max_aspect_ratio: 3.0
 
+  # Número de frames iniciales en los que se suprimen todas las detecciones
+  # para que MOG2 aprenda el fondo antes de emitir alertas.
+  # Rango recomendado: 20–100. Subir: modelo de fondo más maduro al arrancar,
+  # menos falsas alarmas iniciales. Bajar: el sistema entra en servicio más rápido.
+  warmup_frames: 50
+
+# ──────────────────────────────────────────────
+# ALMACENAMIENTO
+# ──────────────────────────────────────────────
 storage:
+  # Directorio donde se guardan los JPEG de evidencia.
+  # Puede ser relativo al directorio de trabajo o absoluto.
+  # Asegúrate de que el proceso tiene permisos de escritura sobre esta ruta.
   output_dir: detections/
 
+# ──────────────────────────────────────────────
+# MQTT (alertas a Home Assistant)
+# ──────────────────────────────────────────────
 mqtt:
+  # Dirección IP o hostname del broker MQTT (ej. Home Assistant con Mosquitto).
   broker_host: "192.168.1.100"
-  broker_port: 1883
-  topic: "insectdetector/alert"
-  cooldown_seconds: 60
 
-orchestrator:
-  capture_limit: 5
+  # Puerto TCP del broker MQTT. Estándar no cifrado: 1883. TLS: 8883.
+  broker_port: 1883
+
+  # Topic MQTT al que se publican las alertas de detección.
+  # En Home Assistant, configura un sensor MQTT que escuche este topic.
+  topic: "insectdetector/alert"
+
+  # Tiempo mínimo en segundos entre dos alertas MQTT consecutivas.
+  # Rango recomendado: 10–300. Subir: reduce el ruido de notificaciones
+  # cuando un insecto permanece en plano. Bajar: alerta con mayor frecuencia.
+  cooldown_seconds: 1
+

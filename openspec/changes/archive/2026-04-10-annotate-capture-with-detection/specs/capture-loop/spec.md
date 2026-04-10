@@ -1,4 +1,4 @@
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: orchestrator.run ejecuta un bucle continuo de detección hasta señal de parada
 El módulo `orchestrator` SHALL exponer `run(config: dict) -> None` que captura frames de forma indefinida usando `FrameSource`, llama a `detector.detect(frame)` en cada frame, y guarda el frame anotado con `storage.save` únicamente cuando `detect()` devuelve al menos una detección Y ha transcurrido más de `cooldown_seconds` desde el último guardado. Antes de llamar a `storage.save`, el orchestrator SHALL llamar a `detector.annotate(frame, detections)` y pasar el frame anotado resultante a `storage.save`. El bucle SHALL terminar limpiamente al recibir `KeyboardInterrupt` o `SIGTERM`.
