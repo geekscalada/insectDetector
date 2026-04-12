@@ -1,0 +1,6 @@
+Iniciando cámara en modo DEBUG...
+Resolución: 1296x972
+Filtros activos para Detección Válida:
+ - Área: 300 a 30000
+ - Aspect Ratio: 1.5 a 3.0
+--------------------------------------------------

@@ -6,9 +6,10 @@ import cv2
 import numpy as np
 
 
-def save(frame: np.ndarray, timestamp: datetime, output_dir: str) -> Path:
+def save(frame: np.ndarray, timestamp: datetime, output_dir: str, prefix: str = "detection") -> Path:
     os.makedirs(output_dir, exist_ok=True)
-    filename = timestamp.strftime("%Y-%m-%dT%H-%M-%S.") + f"{timestamp.microsecond:06d}.jpg"
+    ts = timestamp.strftime("%Y%m%d_%H%M%S_") + f"{timestamp.microsecond // 1000:03d}"
+    filename = f"{ts}_{prefix}.jpg"
     filepath = Path(output_dir) / filename
     cv2.imwrite(str(filepath), frame)
     return filepath

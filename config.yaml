@@ -7,6 +7,36 @@ camera:
   # más carga de CPU. Bajar: menos carga, puede perder insectos de paso rápido.
   fps: 10
 
+  # Resolución de captura en píxeles.
+  # Module 2 NoIR disponible: 640×480, 1296×972, 1920×1080, 3280×2464.
+  # Module 3 NoIR disponible: 640×480, 1296×972, 2304×1296, 4608×2592.
+  # Subir resolución aumenta píxeles por insecto (mejor detección) pero también
+  # la carga de CPU en MOG2. Recomendado para detección fiable: 1296×972.
+  # Ajusta también min_area y max_area en detector al cambiar resolución.
+  width: 1296
+  height: 972
+
+  # ── Exposición fija (opcional) ─────────────────────────────────────────────
+  # Si estas claves están comentadas o ausentes, la cámara usa autoexposición,
+  # autoganancia y balance de blancos automático (comportamiento por defecto).
+  # Fijar estos valores elimina la fuente principal de variación fotométrica
+  # inter-frame que causa falsos positivos en el detector.
+
+  # Tiempo de exposición en microsegundos. Desactiva AEC/AGC cuando se fija.
+  # Rango recomendado para luz ambiente: 5000–30000. Ejemplo de día: 10000.
+  # Descomentar para activar:
+  # exposure_time: 10000
+
+  # Ganancia analógica del sensor. Desactiva AEC/AGC cuando se fija.
+  # Rango recomendado: 1.0–8.0 (1.0 = sin ganancia, sin ruido adicional).
+  # Descomentar para activar:
+  # analogue_gain: 1.5
+
+  # Desactiva el balance de blancos automático (AWB).
+  # false: AWB desactivado (recomendado junto con exposure_time y analogue_gain).
+  # true/ausente: AWB automático (comportamiento por defecto).
+  awb_enable: false
+
 # ──────────────────────────────────────────────
 # DETECTOR DE MOVIMIENTO
 # ──────────────────────────────────────────────
@@ -18,16 +48,18 @@ detector:
   mog2_history: 500
 
   # Umbral de varianza para clasificar un píxel como primer plano (foreground).
-  # Rango recomendado: 8–64. Subir: menos sensible, ignora pequeñas diferencias
+  # Rango recomendado: 8–256. Subir: menos sensible, ignora pequeñas diferencias
   # (reduce ruido). Bajar: más sensible, detecta movimientos sutiles
   # (pero aumenta falsos positivos).
-  mog2_var_threshold: 16
+  # NOTA: con autoexposición activa (exposure_time comentado), valores bajos causan
+  # muchos falsos positivos por las pequeñas variaciones de brillo entre frames.
+  mog2_var_threshold: 128
 
   # Activa la detección de sombras en MOG2 (true/false).
   # true: MOG2 marca las sombras con valor 127 (en lugar de 255) para descartarlas;
   # mejora la precisión pero tiene coste de CPU. false: las sombras se tratan
   # como foreground, lo que puede generar detecciones falsas.
-  detect_shadows: true
+  detect_shadows: false
 
   # Umbral de intensidad relativa para clasificar un píxel como sombra (solo si detect_shadows: true).
   # Rango: 0.0–1.0. Subir (ej. 0.8): menos píxeles se clasifican como sombra,
@@ -38,12 +70,12 @@ detector:
   # Tamaño del kernel del filtro morfológico aplicado a la máscara de foreground.
   # Rango recomendado: 2–7 (impar). Subir: elimina más ruido y fusiona blobs cercanos.
   # Bajar: preserva detalles finos pero puede dejar píxeles de ruido sueltos.
-  morph_kernel_size: 3
+  morph_kernel_size: 7
 
   # Número de iteraciones del filtro morfológico.
   # Rango recomendado: 1–3. Subir: efecto más agresivo (más limpieza o fusión).
   # Bajar: efecto más suave. Valor 1 es suficiente para la mayoría de casos.
-  morph_iterations: 1
+  morph_iterations: 2
 
   # Tipo de operación morfológica sobre la máscara de foreground.
   # Valores: open, close, erode, dilate.
@@ -51,33 +83,74 @@ detector:
   # close (dilatación + erosión): rellena huecos dentro de blobs, une fragmentos próximos.
   # erode: reduce el tamaño de todos los blobs (elimina contornos).
   # dilate: expande el tamaño de todos los blobs (une contornos).
+  # Recomendado 'open' para eliminar primero el ruido aislado del sensor antes de dilatar.
   morph_operator: "open"
 
   # Área mínima en píxeles² para que un blob se considere una detección válida.
   # Rango recomendado: 20–500. Subir: ignora insectos pequeños y ruido.
   # Bajar: detecta insectos muy pequeños pero aumenta falsos positivos.
-  min_area: 50
+  # Calibrado para resolución 1296x972
+  min_area: 800
 
   # Área máxima en píxeles² para que un blob se considere una detección válida.
   # Rango recomendado: 1000–20000. Subir: permite detectar insectos grandes
   # o a poca distancia de la cámara. Bajar: descarta cambios globales (sombras grandes).
-  max_area: 5000
+  # Calibrado para resolución 1296x972
+  max_area: 30000
 
-  # Aspect ratio mínimo (lado_largo / lado_corto) del bounding box.
-  # Rango recomendado: 1.0–2.0. Subir: exige que el blob sea más alargado,
-  # descarta formas cuadradas. Bajar: acepta formas más redondeadas.
-  min_aspect_ratio: 1.5
+  # DEPRECATED — ya no se usa como filtro. Se mantiene por referencia histórica.
+  # El filtro de aspect ratio ha sido reemplazado por el filtro de tamaño físico en cm.
+  # min_aspect_ratio: 1.5
+  # max_aspect_ratio: 3.0
 
-  # Aspect ratio máximo (lado_largo / lado_corto) del bounding box.
-  # Rango recomendado: 2.0–6.0. Subir: acepta blobs muy alargados (insectos en vuelo).
-  # Bajar: descarta blobs demasiado lineales (artefactos, cables, bordes).
-  max_aspect_ratio: 3.0
+  # ── Calibración de tamaño físico ──────────────────────────────────────────
+  # Número de píxeles que corresponden a 1 cm real a la distancia de trabajo.
+  # Calibrar midiendo un objeto de tamaño conocido frente a la cámara:
+  #   pixels_per_cm = ancho_objeto_en_px / ancho_objeto_en_cm
+  # Valor inicial 40 asume ~32 cm de campo visual a 1296px de ancho.
+  # Ajustar en la primera sesión de calibración (tarea 6.5).
+  pixels_per_cm: 40.0
+
+  # Dimensión física máxima permitida en centímetros.
+  # Un contorno se descarta SOLO si AMBAS dimensiones superan los máximos.
+  # Es decir: se acepta si ancho ≤ max_width_cm O alto ≤ max_height_cm.
+  # Umbral objetivo: insectos de hasta 5 cm en cualquier dimensión.
+  max_width_cm: 5.0
+  max_height_cm: 5.0
+
+  # Umbral de solidez mínima de un blob (área_contorno / área_bounding_box).
+  # Rango: 0.0–1.0. Un insecto es compacto (solidez 0.3–0.8). Un artefacto
+  # de tela/arruga es difuso y disperso (solidez < 0.2).
+  # Subir: más selectivo, rechaza blobs irregulares. Bajar: acepta formas más difusas.
+  # Valor recomendado: 0.20. Ajustar si se pierden insectos con formas irregulares.
+  min_solidity: 0.20
 
   # Número de frames iniciales en los que se suprimen todas las detecciones
   # para que MOG2 aprenda el fondo antes de emitir alertas.
   # Rango recomendado: 20–100. Subir: modelo de fondo más maduro al arrancar,
   # menos falsas alarmas iniciales. Bajar: el sistema entra en servicio más rápido.
   warmup_frames: 50
+
+  # ── Filtro de estabilidad fotométrica ──────────────────────────────────────
+  # Detecta cambios de luminancia globales causados por autoexposición (AEC/AGC)
+  # o balance de blancos automático (AWB) y suprime detecciones falsas.
+  photometric:
+    # Activa el filtro (true/false). Si false, el filtro no se ejecuta y MOG2
+    # opera como antes. Recomendado true salvo en entornos con luz muy estable.
+    enable: true
+
+    # Diferencia media absoluta de luminancia entre frame actual y anterior (0–255)
+    # por encima de la cual se considera que el frame es fotométricamente inestable.
+    # Rango recomendado: 3.0–15.0.
+    # Subir: solo filtra cambios muy grandes (menos supresión, puede dejar falsos
+    # positivos). Bajar: más agresivo, puede suprimir frames con movimiento
+    # rápido real. Calibrar comparando en condiciones reales.
+    max_mean_diff: 8.0
+
+    # Tasa de aprendizaje de MOG2 en frames estables (valor negativo = automático
+    # de OpenCV, equivale a 1/history). En frames inestables siempre se usa 0.
+    # Rango: -1 (auto) o entre 0.0 y 1.0. Valor recomendado: -1.
+    learning_rate: -1
 
 # ──────────────────────────────────────────────
 # ALMACENAMIENTO

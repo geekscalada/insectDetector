@@ -5,7 +5,6 @@ from src import detector, storage
 
 
 def run(config: dict) -> None:
-    fps = config['camera']['fps']
     output_dir = config['storage']['output_dir']
     cooldown_seconds = config['mqtt']['cooldown_seconds']
 
@@ -13,12 +12,27 @@ def run(config: dict) -> None:
     last_saved_at = None
 
     try:
-        for frame in FrameSource(fps):
+        for frame in FrameSource(config['camera']):
+            now = datetime.now()
             detections = detector.detect(frame)
-            if not detections:
+
+            if detector.last_photometric_event():
+                try:
+                    storage.save(frame, now, output_dir, prefix="fondo_cambiado")
+                except Exception as e:
+                    print(f"storage error: {e}")
                 continue
 
-            now = datetime.now()
+            if not detections and detector.last_qualifying_count() == 0:
+                continue
+
+            if detector.last_qualifying_count() > 1:
+                try:
+                    storage.save(frame, now, output_dir, prefix="desechada_double")
+                except Exception as e:
+                    print(f"storage error: {e}")
+                continue
+
             if last_saved_at is not None and (now - last_saved_at).total_seconds() < cooldown_seconds:
                 continue
 
