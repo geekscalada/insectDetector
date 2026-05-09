@@ -1,4 +1,4 @@
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: storage.save persiste un frame como JPEG con timestamp en photo_historic
 El módulo `storage` SHALL exponer `save(frame: np.ndarray, timestamp: datetime, output_dir: str, prefix: str = "detection") -> Path` que escribe el frame como JPEG en `output_dir/YYYY-MM-DD/YYYY-MM-DD-HH-MM-SS_{prefix}.jpg`. SHALL crear el subdirectorio de día si no existe. SHALL propagar cualquier excepción de escritura al llamador.

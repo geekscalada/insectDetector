@@ -15,9 +15,9 @@ El sistema SHALL tener un fichero `config.yaml` en la raíz del proyecto que sea
 - **WHEN** se lee `config.yaml`
 - **THEN** el documento contiene `detector.photometric.enable` (bool), `detector.photometric.max_mean_diff` (float) y `detector.photometric.learning_rate` (float)
 
-#### Scenario: config.yaml contiene la sección storage
+#### Scenario: config.yaml contiene la sección photo_historic con output_dir
 - **WHEN** se lee `config.yaml`
-- **THEN** el documento contiene `storage.output_dir` con valor de ruta string
+- **THEN** el documento contiene `photo_historic.output_dir` con valor de ruta string y NO contiene `storage.output_dir` ni `museum.output_dir`
 
 #### Scenario: config.yaml contiene la sección mqtt
 - **WHEN** se lee `config.yaml`
@@ -52,3 +52,24 @@ El fichero `config.yaml` PUEDE contener las claves opcionales `camera.exposure_t
 #### Scenario: config.yaml con claves de exposición fija son leídas por capture
 - **WHEN** `config.yaml` contiene `camera.exposure_time`, `camera.analogue_gain` y `camera.awb_enable`
 - **THEN** el módulo `capture` lee esos valores desde `config['camera']` y los aplica a picamera2 en la inicialización
+
+---
+
+### Requirement: config.yaml contiene photo_historic.output_dir como única ruta de almacenamiento de imágenes
+El fichero `config.yaml` SHALL contener la clave `photo_historic.output_dir` (string de ruta) como única fuente de verdad para el directorio de todas las imágenes guardadas (frames de detección y frames de museo). Las claves `storage.output_dir` y `museum.output_dir` NO deben estar presentes.
+
+#### Scenario: config.yaml contiene la sección photo_historic con output_dir
+- **WHEN** se lee `config.yaml`
+- **THEN** el documento contiene `photo_historic.output_dir` con valor de ruta string
+
+#### Scenario: config.yaml NO contiene storage.output_dir
+- **WHEN** se lee `config.yaml`
+- **THEN** el documento NO contiene la clave `storage.output_dir`
+
+#### Scenario: config.yaml NO contiene museum.output_dir
+- **WHEN** se lee `config.yaml`
+- **THEN** el documento NO contiene la clave `museum.output_dir`
+
+#### Scenario: museum.interval_seconds y museum.retention_days permanecen en la sección museum
+- **WHEN** se lee `config.yaml`
+- **THEN** el documento contiene `museum.interval_seconds` y `museum.retention_days` con sus valores actuales

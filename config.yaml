@@ -153,15 +153,6 @@ detector:
     learning_rate: -1
 
 # ──────────────────────────────────────────────
-# ALMACENAMIENTO
-# ──────────────────────────────────────────────
-storage:
-  # Directorio donde se guardan los JPEG de evidencia.
-  # Puede ser relativo al directorio de trabajo o absoluto.
-  # Asegúrate de que el proceso tiene permisos de escritura sobre esta ruta.
-  output_dir: detections/
-
-# ──────────────────────────────────────────────
 # MQTT (alertas a Home Assistant)
 # ──────────────────────────────────────────────
 mqtt:
@@ -179,4 +170,35 @@ mqtt:
   # Rango recomendado: 10–300. Subir: reduce el ruido de notificaciones
   # cuando un insecto permanece en plano. Bajar: alerta con mayor frecuencia.
   cooldown_seconds: 1
+
+# ──────────────────────────────────────────────
+# MUSEO (archivo fotográfico de referencia)
+# ──────────────────────────────────────────────
+museum:
+  # Intervalo en segundos entre capturas de museo.
+  # El orchestrator reutiliza el frame ya disponible en el bucle de detección;
+  # no se abre una segunda instancia de cámara.
+  # Rango recomendado: 5–60. Subir: menos frames, menos disco.
+  # Bajar: mayor cobertura temporal pero más espacio.
+  interval_seconds: 5
+
+  # Número de días de retención de las carpetas de museo.
+  # Al arrancar, se purgan automáticamente las carpetas con fecha anterior
+  # a (hoy - retention_days). El nombre de carpeta determina la antigüedad.
+  # Estimación de uso de disco:
+  #   5 s/frame × ~200 KB/JPEG → ~3,4 GB/día.
+  #   Con retention_days: 3 → hasta ~10 GB máximo en disco.
+  # Ajusta interval_seconds o retention_days según el espacio disponible.
+  retention_days: 3
+
+# ──────────────────────────────────────────────
+# ARCHIVO FOTOGRÁFICO (museo + detecciones)
+# ──────────────────────────────────────────────
+photo_historic:
+  # Directorio raíz donde se guardan todos los JPEGs: frames periódicos de
+  # museo y evidencias de detección. Se crean subdirectorios por día YYYY-MM-DD/.
+  # La purga de museo opera sobre este directorio — afecta también a las
+  # evidencias de detección de la misma fecha (política de retención unificada).
+  # Puede ser relativo al directorio de trabajo o absoluto.
+  output_dir: photo_historic/
 
